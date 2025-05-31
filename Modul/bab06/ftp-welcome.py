@@ -7,7 +7,7 @@ host = 'localhost'
 ftp = FTP(host)
 
 # Log in to the server with the default user (anonymous)
-ftp.login('hudan', '123')
+ftp.login('faaiz', 'faaiz1203')
 
 # Retrieve and print the welcome message from the FTP server
 welcome_message = ftp.getwelcome()

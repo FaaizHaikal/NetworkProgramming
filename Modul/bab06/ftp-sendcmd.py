@@ -7,7 +7,7 @@ host = 'localhost'
 ftp = FTP(host)
 
 # Log in to the server with the default user (anonymous)
-ftp.login('hudan', '123')
+ftp.login('faaiz', 'faaiz1203')
 
 # Send a custom command (e.g., 'FEAT' to list all features the server supports)
 response = ftp.sendcmd('FEAT')
