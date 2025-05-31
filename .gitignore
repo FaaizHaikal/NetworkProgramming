@@ -1,3 +1,5 @@
 .*
 FTP/
 *.zip
+build/
+*.class
