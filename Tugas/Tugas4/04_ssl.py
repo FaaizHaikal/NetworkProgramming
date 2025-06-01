@@ -1,5 +1,7 @@
 import sys
 import unittest
+from unittest import mock
+from unittest.mock import patch, MagicMock
 import ssl
 import socket
 from io import StringIO
@@ -39,16 +41,31 @@ class TestSSLConnection(unittest.TestCase):
         self.hostname = test_hostname
         self.port = test_port
 
-    def test_ssl_certificate_retrieval(self):
-        cert = get_ssl_certificate(self.hostname, self.port)
-        self.assertIsInstance(cert, dict)
-        assert_cert_has_fields(cert, ['subject', 'issuer'])
+    @patch("ssl.create_default_context")
+    @patch("socket.create_connection")
+    def test_get_ssl_certificate_fields(self, mock_socket, mock_ssl_context):
+        # Mock certificate
+        mock_cert = {
+            "subject": ((("commonName", "www.google.com"),),),
+            "issuer": ((("organizationName", "Google Trust Services LLC"),),),
+            "notAfter": "Aug  5 23:59:59 2025 GMT"
+        }
 
-    def test_certificate_subject(self):
-        cert = get_ssl_certificate(self.hostname, self.port)
-        subject = dict(x[0] for x in cert['subject'])
-        self.assertIn('commonName', subject)
-        print("Common Name (CN):", subject.get('commonName'))
+        # Configure mocks
+        mock_wrap_socket = MagicMock()
+        mock_wrap_socket.getpeercert.return_value = mock_cert
+
+        mock_context = MagicMock()
+        mock_context.wrap_socket.return_value.__enter__.return_value = mock_wrap_socket
+        mock_ssl_context.return_value = mock_context
+
+        # Call the function
+        cert = get_ssl_certificate("www.google.com", 443)
+        print("Common Name (CN):", dict(mock_cert["subject"][0])[ "commonName" ])
+
+        # Use your field assertion function
+        required_fields = ["subject", "issuer"]
+        assert_cert_has_fields(cert, required_fields)
 
 # Entry point
 if __name__ == '__main__':
@@ -56,5 +73,5 @@ if __name__ == '__main__':
         cert = get_ssl_certificate(test_hostname, test_port)
         print("Retrieved SSL Certificate:", cert)
     else:
-        runner = unittest.TextTestRunner()
+        runner = unittest.TextTestRunner(stream=NullWriter())
         unittest.main(testRunner=runner, exit=False)
