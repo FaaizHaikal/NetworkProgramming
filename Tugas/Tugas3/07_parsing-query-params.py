@@ -1,6 +1,7 @@
 import http.client
 import sys
-import unittest.mock as mock
+from unittest import mock
+from unittest.mock import patch, MagicMock
 import unittest
 from io import StringIO
 import json
